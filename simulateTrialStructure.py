@@ -94,12 +94,11 @@ def genStop(propStopTrials, lambdaStop, nTrials, ssd):
 # In[19]:
 
 
-def genMuSigma(muMin, sigmaMin, sigmaMax, changePoint_vec, changeIdx, nTrials):
+def genMuSigma(muMin, muMax, sigmaMin, sigmaMax, changePoint_vec, changeIdx, nTrials):
 
 
     #means and sigma
     nEpochs = np.int(np.sum(changePoint_vec) + 2)
-    muMax = 1-sigmaMax
     mu_p = np.random.uniform(muMin, muMax, np.int(nEpochs/2))
     mu_n = -1*mu_p
     muRewardDelta = np.hstack((mu_p, mu_n))
@@ -114,6 +113,11 @@ def genMuSigma(muMin, sigmaMin, sigmaMax, changePoint_vec, changeIdx, nTrials):
     #choose smaller sigma (based on mu) to avoid violating boundary of 1 or 0
 
     sigma = np.random.uniform(sigmaMin, sigmaMax, 1)
+
+    if (sigmaMax + muMax) > 1 or (sigmaMax + muMin) < 0:
+        raise ValueError("sigmaMax must be lowered to keep range of reward delta >0 and < 1")
+        return None
+
     sigma_vec = np.repeat(sigma, nTrials)
 
     # print(muRewardDelta_vec.size)
@@ -184,8 +188,11 @@ def genStaticPlots(nTrials, ssd_vec, t1_baseReward, t2_baseReward, muRewardDelta
     plt.scatter(x, t1_baseReward, facecolors='b',edgecolors='b', s = 50)
     plt.scatter(x, t2_baseReward, facecolors='r',edgecolors='r',s = 50)
     plt.tick_params(axis='both', which='major', labelsize=20)
+    plt.xlim(0, nTrials)
+    plt.ylim(0, 1)
     plt.legend(["t1", "t2"], fontsize = 20, frameon=True, facecolor = [.7, .7, .7],
                loc = 'best')
+
     plt.savefig('t1t2_rewardTimecourse.pdf')
 
 
@@ -193,13 +200,15 @@ def genStaticPlots(nTrials, ssd_vec, t1_baseReward, t2_baseReward, muRewardDelta
     plt.title("reward structure", fontsize = 40)
     plt.xlabel("trial", fontsize = 30)
     plt.ylabel("$\Delta$ reward probability [t1 - t2]", fontsize = 30)
-    plt.plot(muRewardDelta_vec, '0.85')
+    plt.plot(muRewardDelta_vec, 'k')
     plt.scatter(x, rewardDelta,  s = 50,edgecolor='none', facecolor = 'purple')
-    plt.plot(x[stop_idx], rewardDelta[stop_idx], 'rs',
-            alpha = .5)
+    plt.plot(x[stop_idx], rewardDelta[stop_idx], 's',color = 'orangered',
+            markersize = 20, alpha = .3)
     ax = plt.gca()
     ax.grid(True)
     plt.tick_params(axis='both', which='major', labelsize=20)
+    plt.xlim(0, nTrials)
+    plt.ylim(-1, 1)
     plt.savefig('diff_rewardTimecourse.pdf')
     plt.show()
 
@@ -252,9 +261,9 @@ def animatePlots(nTrials, ssd_vec, t1_baseReward, t2_baseReward, muRewardDelta_v
     plt.xlim(0, nTrials)
     plt.ylim(-1, 1)
 
-    graph, = plt.plot([], [], '0.85')
+    graph, = plt.plot([], [], 'k')
     graph2, = plt.plot([], [], 'o', color = 'purple')
-    graph3, = plt.plot([], [], 'rs', alpha = 0.5)
+    graph3, = plt.plot([], [], 's',color = 'orangered', markersize = 20, alpha = .3)
 
 
     plt.title("reward structure", fontsize = 40)
@@ -295,7 +304,7 @@ def printParameters(t1_baseReward, t2_baseReward, ssd_vec, changePoint_vec, rewa
 # In[24]:
 
 
-def generateTrialStructure(nTrials, muMin, lambdaV, lambdaStop, ssd, sigmaMin, sigmaMax,
+def generateTrialStructure(nTrials, muMin, muMax, lambdaV, lambdaStop, ssd, sigmaMin, sigmaMax,
                            propStopTrials, constantChangePoint, animate):
 
     if nTrials <= 0 or np.mod(nTrials,2) > 0:
@@ -313,14 +322,14 @@ def generateTrialStructure(nTrials, muMin, lambdaV, lambdaStop, ssd, sigmaMin, s
 
     changePoint_vec, changeIdx = genChangePoint(constantChangePoint, lambdaV, nTrials)
     ssd_vec = genStop(propStopTrials, lambdaStop, nTrials, ssd)
-    rewardDelta, muRewardDelta_vec, sigma_vec = genMuSigma(muMin, sigmaMin,
+    rewardDelta, muRewardDelta_vec, sigma_vec = genMuSigma(muMin, muMax, sigmaMin,
                                  sigmaMax, changePoint_vec, changeIdx, nTrials)
     t1_baseReward, t2_baseReward = genBaseTargetReward(rewardDelta, nTrials)
 
     #small chance that reward diff > 1 or <0 (potential if sigma is high &
     #sample is drawn from > 1 std). if so, re-sample.
     while np.any(t1_baseReward > 1) or np.any(t1_baseReward < 0) or np.any(t2_baseReward > 1) or np.any(t2_baseReward < 0):
-        rewardDelta, muRewardDelta_vec, sigma_vec = genMuSigma(muMin, sigmaMin, sigmaMax,
+        rewardDelta, muRewardDelta_vec, sigma_vec = genMuSigma(muMin, muMax, sigmaMin, sigmaMax,
                          changePoint_vec, changeIdx, nTrials)
         t1_baseReward, t2_baseReward = genBaseTargetReward(rewardDelta, nTrials)
 
