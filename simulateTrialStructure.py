@@ -3,13 +3,13 @@
 
 # # volVal trial structure generation
 
-# In[1]:
+# In[15]:
 
 
 #write simulator for various trial structures
 
 
-# In[2]:
+# In[16]:
 
 
 import matplotlib.pyplot as plt
@@ -27,7 +27,7 @@ from jupyterthemes import jtplot
 get_ipython().magic('matplotlib inline')
 
 
-# In[3]:
+# In[17]:
 
 
 def genChangePoint(constantChangePoint, lambdaV, nTrials):
@@ -62,10 +62,10 @@ def genChangePoint(constantChangePoint, lambdaV, nTrials):
     return changePoint_vec, changeIdx
 
 
-# In[4]:
+# In[18]:
 
 
-def genStop(propStopTrials, lambdaStop, nTrials):
+def genStop(propStopTrials, lambdaStop, nTrials, ssd):
 
     #stop trials 
     nStopTrials = np.int(propStopTrials * nTrials)
@@ -91,7 +91,7 @@ def genStop(propStopTrials, lambdaStop, nTrials):
     return ssd_vec
 
 
-# In[5]:
+# In[19]:
 
 
 def genMuSigma(muMin, sigmaMin, sigmaMax, changePoint_vec, changeIdx, nTrials):
@@ -144,7 +144,7 @@ def genMuSigma(muMin, sigmaMin, sigmaMax, changePoint_vec, changeIdx, nTrials):
     return rewardDelta, muRewardDelta_vec, sigma_vec
 
 
-# In[6]:
+# In[20]:
 
 
 def genBaseTargetReward(rewardDelta, nTrials):
@@ -167,7 +167,7 @@ def genBaseTargetReward(rewardDelta, nTrials):
     return t1_baseReward, t2_baseReward
 
 
-# In[12]:
+# In[21]:
 
 
 def genStaticPlots(nTrials, ssd_vec, t1_baseReward, t2_baseReward, muRewardDelta_vec, 
@@ -206,7 +206,7 @@ def genStaticPlots(nTrials, ssd_vec, t1_baseReward, t2_baseReward, muRewardDelta
     return None
 
 
-# In[8]:
+# In[22]:
 
 
 def animatePlots(nTrials, ssd_vec, t1_baseReward, t2_baseReward, muRewardDelta_vec, 
@@ -235,8 +235,8 @@ def animatePlots(nTrials, ssd_vec, t1_baseReward, t2_baseReward, muRewardDelta_v
 
         return graph
 
-    anim = FuncAnimation(t1t2_reward_fig, animate, frames=nTrials, interval=1)
-    plt.show()
+    anim = FuncAnimation(t1t2_reward_fig, animate, frames=nTrials, interval=5)
+#     plt.show()
     HTML(anim.to_html5_video())
 
     anim.save('t1t2_rewardTimecourse.mp4',extra_args=['-vcodec', 'libx264'])
@@ -268,8 +268,8 @@ def animatePlots(nTrials, ssd_vec, t1_baseReward, t2_baseReward, muRewardDelta_v
         graph3.set_data(stop_x[:i+1], stop_rewardDelta[:i+1])
         return graph
 
-    anim = FuncAnimation(rewardDelta_fig, animate_data, frames=nTrials, interval=1)
-    plt.show()
+    anim = FuncAnimation(rewardDelta_fig, animate_data, frames=nTrials, interval=5)
+#     plt.show()
     HTML(anim.to_html5_video())
 
     anim.save('diff_rewardTimecourse.mp4', extra_args=['-vcodec', 'libx264'])
@@ -277,7 +277,7 @@ def animatePlots(nTrials, ssd_vec, t1_baseReward, t2_baseReward, muRewardDelta_v
     return None
 
 
-# In[9]:
+# In[23]:
 
 
 #print to file specified by user
@@ -292,10 +292,10 @@ def printParameters(t1_baseReward, t2_baseReward, ssd_vec, changePoint_vec, rewa
     return None
 
 
-# In[10]:
+# In[24]:
 
 
-def generateTrialStructure(nTrials, lambdaV, lambdaStop, ssd, sigmaMin, sigmaMax,
+def generateTrialStructure(nTrials, muMin, lambdaV, lambdaStop, ssd, sigmaMin, sigmaMax,
                            propStopTrials, constantChangePoint, animate):
          
     if nTrials <= 0 or np.mod(nTrials,2) > 0:
@@ -312,7 +312,7 @@ def generateTrialStructure(nTrials, lambdaV, lambdaStop, ssd, sigmaMin, sigmaMax
         return None 
 
     changePoint_vec, changeIdx = genChangePoint(constantChangePoint, lambdaV, nTrials)
-    ssd_vec = genStop(propStopTrials, lambdaStop, nTrials)
+    ssd_vec = genStop(propStopTrials, lambdaStop, nTrials, ssd)
     rewardDelta, muRewardDelta_vec, sigma_vec = genMuSigma(muMin, sigmaMin, 
                                  sigmaMax, changePoint_vec, changeIdx, nTrials)
     t1_baseReward, t2_baseReward = genBaseTargetReward(rewardDelta, nTrials)
@@ -337,7 +337,7 @@ def generateTrialStructure(nTrials, lambdaV, lambdaStop, ssd, sigmaMin, sigmaMax
     return t1_baseReward, t2_baseReward, ssd_vec, changePoint_vec, rewardDelta, muRewardDelta_vec, sigma_vec
 
 
-# In[13]:
+# In[25]:
 
 
 #testing 
