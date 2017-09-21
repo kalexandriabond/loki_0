@@ -49,17 +49,17 @@ def genChangePoint(constantChangePoint, lambdaV, nTrials):
 
         #convert to trial number indices
         changeIdx = list(np.cumsum(changePoints))
-        #mark change point
+        #mark changepoint
         changePoint_vec[changeIdx] = 1
 
     elif constantChangePoint == 1:
         changePoints = np.int(np.random.poisson(lambdaV,1))
-        changePoint_vec[changePoints::changePoints] = 1
+        changePoint_vec[changePoints::changePoints] = 1 #mark changepoint
         changeIdx = list(np.cumsum(np.repeat(changePoints, np.sum(changePoint_vec))))
 
     #     print(changeIdx)
     #     print(np.sum(changePoint_vec)*changePoints, changePoints)
-    return changePoint_vec, changeIdx
+    return changePoint_vec, changeIdx #return vec and list of indices to use in genMuSigma
 
 
 # In[18]:
@@ -124,6 +124,7 @@ def genMuSigma(muMin, muMax, sigmaMin, sigmaMax, changePoint_vec, changeIdx, nTr
 
 
     #sample from a normal distribution to generate reward delta for each trial
+    #using above sigma & mu
     rewardDelta = np.zeros((nTrials))
 
     #this adds 0 and the end idx to change idx
@@ -177,7 +178,8 @@ def genBaseTargetReward(rewardDelta, nTrials):
 def genStaticPlots(nTrials, ssd_vec, t1_baseReward, t2_baseReward, muRewardDelta_vec,
                rewardDelta):
 
-    plot_filename = input('Enter plot filename (ex: lowRiskHighAmbigLowConflict):')
+    filename = input('Enter condition-specific filename for ' +
+    'plots and parameter output file (ex: lowRiskHighAmbigLowConflict):')
 
     x = np.arange(0,nTrials)
     stop_idx = np.isfinite(ssd_vec)
@@ -195,7 +197,7 @@ def genStaticPlots(nTrials, ssd_vec, t1_baseReward, t2_baseReward, muRewardDelta
     plt.legend(["t1", "t2"], fontsize = 20, frameon=True, facecolor = [.7, .7, .7],
                loc = 'best')
 
-    plt.savefig('t1t2_rewardTimecourse' + plot_filename + '.pdf')
+    plt.savefig('t1t2_rewardTimecourse' + filename + '.pdf')
 
 
     plt.figure(figsize=(20, 10))
@@ -205,23 +207,23 @@ def genStaticPlots(nTrials, ssd_vec, t1_baseReward, t2_baseReward, muRewardDelta
     plt.plot(muRewardDelta_vec, 'k')
     plt.scatter(x, rewardDelta,  s = 50,edgecolor='none', facecolor = 'purple')
     plt.plot(x[stop_idx], rewardDelta[stop_idx], 's',color = 'orangered',
-            markersize = 20, alpha = .3)
+            markersize = 10, alpha = .3)
     ax = plt.gca()
     ax.grid(True)
     plt.tick_params(axis='both', which='major', labelsize=20)
     plt.xlim(0, nTrials)
     plt.ylim(-1, 1)
-    plt.savefig('diff_rewardTimecourse' + plot_filename + '.pdf')
+    plt.savefig('diff_rewardTimecourse' + filename + '.pdf')
     plt.show()
 
-    return plot_filename
+    return filename
 
 
 # In[22]:
 
 
 def animatePlots(nTrials, ssd_vec, t1_baseReward, t2_baseReward, muRewardDelta_vec,
-               rewardDelta, plot_filename):
+               rewardDelta, filename):
 
 
 
@@ -253,15 +255,12 @@ def animatePlots(nTrials, ssd_vec, t1_baseReward, t2_baseReward, muRewardDelta_v
 #     plt.show()
     HTML(anim.to_html5_video())
 
-    anim.save('t1t2_rewardTimecourse_' + plot_filename +'.mp4',extra_args=['-vcodec', 'libx264'])
+    anim.save('t1t2_rewardTimecourse_' + filename +'.mp4',extra_args=['-vcodec', 'libx264'])
 
 
     #reward structure diff
-    stop_idx = np.isfinite(ssd_vec)
-    stop_x = x[stop_idx]
-    stop_rewardDelta = rewardDelta[stop_idx]
-    stopZeros = -3*np.ones((nTrials)) #this is arbitrary...
-    stopZeros[stop_idx] = rewardDelta[stop_idx]
+
+
 
 
     rewardDelta_fig = plt.figure(figsize=(20, 10))
@@ -271,7 +270,7 @@ def animatePlots(nTrials, ssd_vec, t1_baseReward, t2_baseReward, muRewardDelta_v
 
     graph, = plt.plot([], [], 'k')
     graph2, = plt.plot([], [], 'o', color = 'purple')
-    graph3, = plt.plot([], [], 's',color = 'orangered', markersize = 20, alpha = .3)
+    graph3, = plt.plot([], [], 's',color = 'orangered', markersize = 10, alpha = .3)
 
 
     plt.title("reward structure", fontsize = 40)
@@ -282,14 +281,14 @@ def animatePlots(nTrials, ssd_vec, t1_baseReward, t2_baseReward, muRewardDelta_v
     def animate_data(i):
         graph.set_data(x[:i+1], muRewardDelta_vec[:i+1])
         graph2.set_data(x[:i+1], rewardDelta[:i+1])
-        graph3.set_data(x[:i+1], stopZeros[:i+1])
+        graph3.set_data(x[:i+1], ssd_vec[:i+1])
         return graph
 
     anim = FuncAnimation(rewardDelta_fig, animate_data, frames=nTrials, interval=10)
 #     plt.show()
     HTML(anim.to_html5_video())
 
-    anim.save('diff_rewardTimecourse_' + plot_filename + '.mp4', extra_args=['-vcodec', 'libx264'])
+    anim.save('diff_rewardTimecourse_' + filename + '.mp4', extra_args=['-vcodec', 'libx264'])
 
     return None
 
@@ -299,12 +298,11 @@ def animatePlots(nTrials, ssd_vec, t1_baseReward, t2_baseReward, muRewardDelta_v
 
 #print to file specified by user
 def printParameters(t1_baseReward, t2_baseReward, ssd_vec, changePoint_vec, rewardDelta,
-                muRewardDelta_vec, sigma_vec):
-    filename = input('Enter parameter output filename: ')
+                muRewardDelta_vec, sigma_vec, filename):
     taskParameters = np.array((t1_baseReward, t2_baseReward, ssd_vec, changePoint_vec, rewardDelta,
                 muRewardDelta_vec, sigma_vec))
     taskParameters = np.matrix.transpose(taskParameters)
-    header = ("t1_baseReward, t2_baseReward, ssd_vec, changePoint_vec, rewardDelta, muRewardDelta, sigma_vec")
+    header = ("t1_baseReward, t2_baseReward, ssd, changepoint, rewardDelta, muRewardDelta, sigma")
     np.savetxt(filename + '.csv',taskParameters, header = header, delimiter=',', comments = '', fmt='%f')
     return None
 
@@ -342,13 +340,14 @@ def generateTrialStructure(nTrials, muMin, muMax, lambdaV, lambdaStop, ssd, sigm
         t1_baseReward, t2_baseReward = genBaseTargetReward(rewardDelta, nTrials)
 
     #print parameters to user-specified filename
-    printParameters(t1_baseReward, t2_baseReward, ssd_vec, changePoint_vec, rewardDelta,
-                muRewardDelta_vec, sigma_vec)
-    plot_filename = genStaticPlots(nTrials, ssd_vec, t1_baseReward, t2_baseReward, muRewardDelta_vec,
+
+    filename = genStaticPlots(nTrials, ssd_vec, t1_baseReward, t2_baseReward, muRewardDelta_vec,
                rewardDelta)
+    printParameters(t1_baseReward, t2_baseReward, ssd_vec, changePoint_vec, rewardDelta,
+               muRewardDelta_vec, sigma_vec, filename)
     if animate == 1:
         animatePlots(nTrials, ssd_vec, t1_baseReward, t2_baseReward, muRewardDelta_vec,
-               rewardDelta, plot_filename)
+               rewardDelta, filename)
 
 
     return t1_baseReward, t2_baseReward, ssd_vec, changePoint_vec, rewardDelta, muRewardDelta_vec, sigma_vec
