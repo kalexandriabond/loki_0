@@ -76,7 +76,6 @@ def genChangePoint(constantChangePoint, lambdaV, nTrials_approx, propStopTrials,
 
 def genStop(propStopTrials, lambdaStop, nTrials, ssd):
 
-    #stop trials
     nStopTrials = np.int(propStopTrials * nTrials)
     stopPoints = np.random.poisson(lambdaStop,nStopTrials) #length
     stopIdx = np.cumsum(stopPoints) #indices
@@ -106,7 +105,6 @@ def genStop(propStopTrials, lambdaStop, nTrials, ssd):
 def genMuSigma(muMin, muMax, sigmaMin, sigmaMax, changePoint_vec, changeIdx, nTrials):
 
 
-    #means and sigma
     nEpochs = np.int(np.sum(changePoint_vec) + 2)
 
     #more control over separation between mean values of each epoch
@@ -124,7 +122,6 @@ def genMuSigma(muMin, muMax, sigmaMin, sigmaMax, changePoint_vec, changeIdx, nTr
     sigma_vec = np.repeat(sigma, nTrials)
 
 
-    #sample from a normal distribution to generate reward delta for each trial
     rewardDelta = np.ones((nTrials))
 
     #this adds 0 and the end idx to change idx
@@ -134,6 +131,7 @@ def genMuSigma(muMin, muMax, sigmaMin, sigmaMax, changePoint_vec, changeIdx, nTr
     intervals = [(chgidx[i],chgidx[i+1]) for i in range(len(chgidx)-1)]
     muRewardDelta_vec = np.ones_like(rewardDelta)
 
+    #sample from a normal distribution to generate reward delta for each trial
     while round(np.mean(muRewardDelta_vec),4) != 0:
 
         mu_p = np.random.uniform(muMin, muMax, np.int(nEpochs/2))
@@ -162,8 +160,6 @@ def genMuSigma(muMin, muMax, sigmaMin, sigmaMax, changePoint_vec, changeIdx, nTr
 def genBaseTargetReward(rewardDelta, nTrials, ssd_vec, sigma_vec, changePoint_vec):
 
     #reverse engineer the actual values for targets
-
-    #assume baseline value of .5 for each
     rewardDelta_div = 0.5*rewardDelta
 
     adjustedTargets = np.zeros((nTrials,2))
@@ -332,7 +328,6 @@ changePoint_vec, rewardDelta, muRewardDelta_vec, sigma_vec):
         t2_baseReward = np.append(t2_baseReward,rewardClamp_vec)
         t1_baseReward = np.append(t1_baseReward, zeroPad)
 
-
     ssd_vec = np.append(ssd_vec, nanPad)
     muRewardDelta_vec = np.append(muRewardDelta_vec, rewardPad)
     rewardDelta = np.append(rewardDelta, rewardPad)
@@ -374,7 +369,7 @@ def generateTrialStructure(nTrials_approx, muMin, muMax, lambdaV, lambdaStop, ss
     t1_baseReward, t2_baseReward = genBaseTargetReward(rewardDelta, nTrials, ssd_vec,
     sigma_vec, changePoint_vec)
 
-    #small chance that reward diff > 1 or <0 (potential if sigma is high &
+    #small chance that reward diff > 1 or < -1 (potential if sigma is high &
     #sample is drawn from > 1 std). if so, re-sample.
     while np.any(rewardDelta > 1) or np.any(rewardDelta < -1):
 
