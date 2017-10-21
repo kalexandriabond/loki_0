@@ -1,4 +1,4 @@
-# volatileValues_generateTrialStructure
+# volatileValues
 generate probabilistic parameters for volatileValues project
 
 generateSimulateAnalyze.ipynb plots demonstrations of trial structures for each condition.<br>
