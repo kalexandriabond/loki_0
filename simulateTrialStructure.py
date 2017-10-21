@@ -215,6 +215,7 @@ def genStaticPlots(ssd_vec, t1_baseReward, t2_baseReward, muRewardDelta_vec,
     plt.tick_params(axis='both', which='major', labelsize=20)
     plt.xlim(0, nTrials)
     plt.ylim(-1.1, 1.1)
+    plt.grid('on')
     plt.savefig('diff_rewardTimecourse_' + filename + '.pdf')
     plt.show()
 
@@ -362,7 +363,11 @@ def generateTrialStructure(nTrials_approx, muMin, muMax, lambdaV, lambdaStop, ss
     changePoint_vec, changeIdx, nChangePoints, nTrials = genChangePoint(constantChangePoint, lambdaV, nTrials_approx,
      propStopTrials, ssd)
 
-    ssd_vec = genStop(propStopTrials, lambdaStop, nTrials, ssd)
+    if propStopTrials > 0:
+        ssd_vec = genStop(propStopTrials, lambdaStop, nTrials, ssd)
+    else:
+        ssd_vec = np.ones_like(changePoint_vec)*np.nan
+
     rewardDelta, muRewardDelta_vec, sigma_vec = genMuSigma(muMin, muMax, sigmaMin,
                                  sigmaMax, changePoint_vec, changeIdx, nTrials)
 
