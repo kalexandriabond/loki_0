@@ -42,7 +42,7 @@ else:
     else:
         sys.exit("Unknown condition.")
 
-file_name = subj_id + "_cond" + condition + "_session" + session
+file_name = subj_id + condition + "_session" + session
 data_path = os.getcwd() + '/data/' + file_name + ".csv"
 run_info_path = os.getcwd() + '/data/' + file_name + "_runInfo.csv"
 
@@ -54,7 +54,7 @@ if not testing and os.path.exists(data_path):
 instructions = ("In this task, you will be able to choose between opening one of two boxes. When you open a box, you will get a certain number of coins. However, opening the same box will not always give you the same number of coins. After making your choice, you will receive feedback about how much money you have. Your goal is to make as much money as possible. "
 +"\n\nChoose the left box by pressing the left arrow key and choose the right box by pressing the right arrow key. Press any key when you're ready to begin.")
 slow_trial = ("Too slow! \nChoose quickly.")
-fast_trial = ("Too fast! \nSlow down.")
+# fast_trial = ("Too fast! \nSlow down.")
 break_inst = ("Feel free to take a break! \nWhen you're ready, press any key to continue.")
 
 
@@ -109,7 +109,7 @@ beep = sound.Sound('./sounds/buzz.wav')
 coin_sound = sound.Sound('./sounds/add_coin.wav')
 break_block = sound.Sound('./sounds/break_block.wav')
 
-runtimeInfo = info.RunTimeInfo(author='kb',win=window,userProcsDetailed=False, verbose=False)
+runtimeInfo = info.RunTimeInfo(author='kb',win=window,userProcsDetailed=False, verbose=True)
 rewardMsg = visual.TextStim(win=window,units='pix',antialias='False',pos=[-20,200], colorSpace='rgb', color=[1,1,1],height=screen_size[0]/30)
 totalMsg = visual.TextStim(win=window,units='pix',antialias='False',pos=[treasure_chest.pos[0]-150,treasure_chest.pos[1]], colorSpace='rgb', color=[.3,.3,.3],height=screen_size[0]/40)
 
@@ -161,8 +161,8 @@ received_rewards = []
 total_rewards = []
 correct_choices = []
 trial_time = []
+cp_with_slow = []
 cp_list = exp_param.cp.values[0:n_trials].tolist()
-
 
 """give instructions"""
 instruction_phase = True
@@ -180,15 +180,20 @@ while instruction_phase:
 
 inst_msg.setAutoDraw(False)
 window.flip()
+
 total_reward = 0
+t=0
+
 totalMsg.text = str(total_reward)
 totalMsg.setAutoDraw(True)
 treasure_chest.setAutoDraw(True)
 
 
 """"present choices"""
-for t in range(0,n_trials):
-    if t == int(n_trials/2): #CHANGE THIS MAYBE. WILL MAYBE NEED TO LOAD ANOTHER FILE.
+while t < n_trials:
+    if t == int(n_trials/2):
+        if cp_list[t+1] != 1:
+            print("ERROR! slice is incorrect.")
         break_msg.setAutoDraw(True)
         window.flip()
         clock.reset()
@@ -256,6 +261,7 @@ for t in range(0,n_trials):
         window.flip()
         core.wait(fb_time)
 
+
     if rt >= rt_max:
         window.flip()
         speed_msg.text = slow_trial
@@ -267,11 +273,14 @@ for t in range(0,n_trials):
         core.wait(fb_time)
         speed_msg.setAutoDraw(False)
         received_rewards.append(0)
+        cp_with_slow.append(np.nan)
 
-    elif rt <= rt_min:
-        speed_msg.text = fast_trial
-        speed_msg.draw()
-        received_rewards.append(0)
+    # elif rt <= rt_min: #think about this
+    #     speed_msg.text = fast_trial
+    #     speed_msg.draw()
+    #     received_rewards.append(0)
+    else:
+        cp_with_slow.append(cp_list[t])
 
 
     total_rewards.append(total_reward)
@@ -291,20 +300,29 @@ for t in range(0,n_trials):
     trial_time.append(trialTime_clock.getTime())
     trialTime_clock.reset()
 
+    if rt > rt_max:
+        continue
+    else:
+        t+=1
+
 total_exp_time=expTime_clock.getTime()
 
 """save data"""
-header = ("choice, rt, cp, accuracy, reward, cumulative_reward, solution, total_trial_time, iti")
-data = np.transpose(np.matrix((choice_list, rt_list, cp_list, accuracy_list,
- received_rewards, total_rewards, correct_choices,trial_time, iti_list)))
+header = ("choice, accuracy, solution,  reward, cumulative_reward, rt,  total_trial_time, iti, cp_with_slow")
+data = np.transpose(np.matrix((choice_list, accuracy_list,correct_choices,
+ received_rewards, total_rewards, rt_list, trial_time, iti_list, cp_with_slow)))
 
-runtime_data = np.matrix((runtimeInfo['psychopyVersion'], runtimeInfo['pythonVersion'],
-runtimeInfo['windowRefreshTimeAvg_ms'], str(runtimeInfo['experimentRunTime']),
+runtime_data = np.matrix((str(runtimeInfo['psychopyVersion']), str(runtimeInfo['pythonVersion']),
+str(runtimeInfo['pythonScipyVersion']),str(runtimeInfo['pythonPygletVersion']),
+str(runtimeInfo['pythonPygameVersion']),str(runtimeInfo['pythonNumpyVersion']),str(runtimeInfo['pythonWxVersion']),
+str(runtimeInfo['windowRefreshTimeAvg_ms']), str(runtimeInfo['experimentRunTime']),
 str(runtimeInfo['experimentScript.directory']),str(runtimeInfo['systemRebooted']),
 str(runtimeInfo['systemPlatform']),str(runtimeInfo['systemHaveInternetAccess']), total_exp_time, break_time))
 
-runtime_header = ("psychopy_version, python_version, window_refresh_time_avg_ms,\
-begin_time, exp_dir, last_sys_reboot, system_platform, internet_access, total_exp_time, break_time")
+runtime_header = ("psychopy_version, python_version, pythonScipyVersion,\
+pyglet_version, pygame_version, numpy_version,wx_version, window_refresh_time_avg_ms,\
+begin_time, exp_dir, last_sys_reboot, system_platform, internet_access,\
+ total_exp_time, break_time")
 np.savetxt(data_path, data, header=header, delimiter=',',comments='')
 np.savetxt(run_info_path,runtime_data, header=runtime_header,delimiter=',',comments='',fmt="%s")
 
