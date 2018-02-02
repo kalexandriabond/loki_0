@@ -11,9 +11,9 @@ from random import shuffle
 
 io=launchHubServer()
 
-#set data path & collect information from experimenter
-# testing = int(raw_input("Testing? "))
-testing = 0
+# set data path & collect information from experimenter
+testing = int(raw_input("Testing? "))
+# testing = 0
 if testing is not 1 and testing is not 0:
     sys.exit('Enter 0 or 1.')
 
@@ -61,11 +61,11 @@ run_info_path = os.getcwd() + '/data/' + file_name + "_runInfo.csv"
 
 if not testing and os.path.exists(data_path):
     sys.exit(file_name + " already exists!")
-instructions = ("In this task, you will be able to choose between opening one of two boxes -- one blue and one orange. When you open a box, you will get a certain number of coins, depending on the color of the box. However, opening the same box will not always give you the same number of coins. After making your choice, you will receive feedback about how much money you have. Your goal is to make as much money as possible. "
-+"\n\nChoose the left box by pressing the yellow button and choose the right box by pressing the blue button. Note that if you choose too slowly or too quickly, you won't earn any coins. Finally, remember to make your choice based on the color of the box. Press the space bar when you're ready to begin.")
+instructions = ("In this task, you will be able to choose between opening one of two boxes -- one purple and one orange. When you open a box, you will get a certain number of coins, depending on the color of the box. However, opening the same box will not always give you the same number of coins. After making your choice, you will receive feedback about how much money you have. Your goal is to make as much money as possible. "
++"\n\nChoose the left box by pressing the left button and choose the right box by pressing the right button. Note that if you choose too slowly or too quickly, you won't earn any coins. Finally, remember to make your choice based on the color of the box. Press the green button when you're ready to begin.")
 slow_trial = ("Too slow! \nChoose quickly.")
 fast_trial = ("Too fast! \nSlow down. \nYou can continue in 5 seconds.")
-break_inst = ("Feel free to take a break! \nWhen you're ready, press the space bar to continue.")
+break_inst = ("Feel free to take a break! \nPress the green button when you're ready to continue.")
 
 
 #initialize dependent variables
@@ -102,8 +102,8 @@ alignHoriz='center', colorSpace='rgb',color=[1,0,0], bold=True)
 
 
 choice_emphasis = visual.Rect(win=window, units='pix', height = screen_size[0]/7, width= screen_size[0]/7, lineColorSpace='rgb',lineColor=[1,1,1], lineWidth=5)
-cue_1 = visual.ImageStim(window, image='./images/blue_block.png',units='pix',size=[screen_size[0]/15])
-cue_0 = visual.ImageStim(window, image='./images/orange_block.png',units='pix',size=[screen_size[0]/15])
+purple_block = visual.ImageStim(window, image='./images/purple_block.png',units='pix',size=[screen_size[0]/15])
+orange_block = visual.ImageStim(window, image='./images/orange_block.png',units='pix',size=[screen_size[0]/15])
 coin = visual.ImageStim(window, image='./images/coin.png',units='pix',size=[screen_size[0]/20], pos=[120,200])
 treasure_chest = visual.ImageStim(window, image='./images/treasure_chest.png',units='pix',size=[screen_size[0]/18], pos=[800,screen_size[1]/2.5])
 
@@ -114,7 +114,8 @@ runtimeInfo = info.RunTimeInfo(author='kb',win=window,userProcsDetailed=False, v
 rewardMsg = visual.TextStim(win=window,units='pix',antialias='False',pos=[-20,200], colorSpace='rgb', color=[1,1,1],height=screen_size[0]/30)
 totalMsg = visual.TextStim(win=window,units='pix',antialias='False',pos=[treasure_chest.pos[0]-150,treasure_chest.pos[1]], colorSpace='rgb', color=[.3,.3,.3],height=screen_size[0]/40)
 
-cue_list = [cue_1, cue_0]
+cue_list = [purple_block, orange_block]
+high_val_cue = []
 
 #specify constants
 exp_param = read_csv(exp_param_file, header=0)
@@ -179,7 +180,7 @@ instruction_phase = True
 while instruction_phase:
     inst_msg.setAutoDraw(True)
     window.flip()
-    inst_keys = event.waitKeys(keyList=['space'])
+    inst_keys = event.waitKeys(keyList=['s'])
     instruction_phase = False
 
 inst_msg.setAutoDraw(False)
@@ -195,6 +196,7 @@ treasure_chest.setAutoDraw(True)
 break_screen = False #this is needed because t/2 is possible more than once if a slow trial is repeated
 
 expTime_clock.reset() #reset so that inst. time is not included
+trialTime_clock.reset()
 
 #present choices
 while t < n_trials:
@@ -202,13 +204,13 @@ while t < n_trials:
         break_msg.setAutoDraw(True)
         window.flip()
         clock.reset()
-        break_data = event.waitKeys(keyList=['space'],timeStamped=clock)
+        break_data = event.waitKeys(keyList=['s'], timeStamped=clock)
         break_time = break_data[0][1]
         break_msg.setAutoDraw(False)
         break_screen = True
         event.clearEvents()
-    cue_0.setPos([l_r_x_arr[t], y])
-    cue_1.setPos([-l_r_x_arr[t], y])
+    orange_block.setPos([l_r_x_arr[t], y])
+    purple_block.setPos([-l_r_x_arr[t], y])
     cue_list[0].setAutoDraw(True)
     cue_list[1].setAutoDraw(True)
 
@@ -227,6 +229,11 @@ while t < n_trials:
     #reverse high value target at changepoint
     if cp_list[t] == 1:
         cue_list.reverse()
+    #record the identity of the high value target in ascii
+    if cue_list[0] == purple_block:
+        high_val_cue.append(ord('p'))
+    elif cue_list[0] == orange_block:
+        high_val_cue.append(ord('o'))
 
     if cue_list[0].pos[0] == left_pos_x:
         correct_choice = left_key
@@ -322,15 +329,11 @@ while t < n_trials:
 
 total_exp_time=expTime_clock.getTime()
 
-print(len(choice_list), len(accuracy_list),len(correct_choices),
- len(received_rewards), len(total_rewards), len(rt_list), len(trial_time),
- len(iti_list), len(cp_with_slow_fast))
-
 
 #save data
-header = ("choice, accuracy, solution,  reward, cumulative_reward, rt,  total_trial_time, iti, cp_with_slow_fast")
+header = ("choice, accuracy, solution,  reward, cumulative_reward, rt,  total_trial_time, iti, cp_with_slow_fast, high_val_cue")
 data = np.transpose(np.matrix((choice_list, accuracy_list,correct_choices,
- received_rewards, total_rewards, rt_list, trial_time, iti_list, cp_with_slow_fast)))
+ received_rewards, total_rewards, rt_list, trial_time, iti_list, cp_with_slow_fast, high_val_cue)))
 
 runtime_data = np.matrix((str(runtimeInfo['psychopyVersion']), str(runtimeInfo['pythonVersion']),
 str(runtimeInfo['pythonScipyVersion']),str(runtimeInfo['pythonPygletVersion']),
