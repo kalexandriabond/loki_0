@@ -12,8 +12,8 @@ from random import shuffle
 io=launchHubServer()
 
 # set data path & collect information from experimenter
-testing = int(raw_input("Testing? "))
-# testing = 0
+# testing = int(raw_input("Testing? "))
+testing = 0
 if testing is not 1 and testing is not 0:
     sys.exit('Enter 0 or 1.')
 
