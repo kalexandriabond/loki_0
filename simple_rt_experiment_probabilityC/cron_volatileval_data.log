@@ -1,0 +1,22 @@
+On branch master
+Your branch is up-to-date with 'origin/master'.
+
+Changes not staged for commit:
+	modified:   ../Algorithm.ipynb
+	modified:   .DS_Store
+	modified:   .iohpid
+	modified:   pilot_condition_order.csv
+
+Untracked files:
+	../.ipynb_checkpoints/
+	../m_plots/.ipynb_checkpoints/
+	cron_volatileVal_data.log
+	push_data.sh
+	../test_highC.csv
+	../test_highV.csv
+	../test_lowC.csv
+	../test_lowV.csv
+	../testing_new_implementation.ipynb
+
+no changes added to commit
+Everything up-to-date
