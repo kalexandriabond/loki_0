@@ -21,23 +21,14 @@ image_directory = os.getcwd() + '/images/'
 exp_param_directory = os.getcwd() + '/experimental_parameters/'
 analysis_directory = os.getcwd() + '/analysis/'
 data_directory = os.getcwd() + '/data/'
-
-#
-# """counterbalance, check whether the person has already completed the task"""
-# cond_list = ["lvlc", "lvhc", "hvlc", "hvhc"]
-# current_condition = random.sample(cond_list,1)[0]
-# stem=subj_id+"_"+current_condition
-#
-# for file in os.listdir(data_directory):
-#     if file.lower().startswith(stem):
-#         existing.append(file)
-#         trialfile_n = len([stem in os.listdir(data_directory)]) - 1 #0-based
+deterministic_exp_param_directory = os.getcwd() + '/experimental_parameters/deterministic_schedules/'
 
 if testing:
     subj_id = 'test'
     condition = str(0)
     trialfile_n = str(0)
-    exp_param_file = exp_param_directory + 'test_highV.csv'
+    exp_param_file = exp_param_directory + 'test_highC.csv'
+    # exp_param_file = deterministic_exp_param_directory + 'test_highV.csv'
 else:
     subj_id = raw_input("Subject ID: ")
     condition = int(raw_input("Condition: "))
@@ -61,8 +52,29 @@ run_info_path = os.getcwd() + '/data/' + file_name + "_runInfo.csv"
 
 if not testing and os.path.exists(data_path):
     sys.exit(file_name + " already exists!")
-instructions = ("In this task, you will be able to choose between opening one of two boxes -- one purple and one orange. When you open a box, you will get a certain number of coins, depending on the color of the box. However, opening the same box will not always give you the same number of coins, and each choice costs one coin. After making your choice, you will receive feedback about how much money you have. Your goal is to make as much money as possible. "
-+"\n\nChoose the left box by pressing the left button and choose the right box by pressing the right button. Note that if you choose too slowly or too quickly, you won't earn any coins. Finally, remember to make your choice based on the color of the box. Press the green button when you're ready to begin.")
+
+
+#specify constants
+exp_param = read_csv(exp_param_file, header=0)
+exp_param.columns = ['t1_r', 't2_r','c_prob', 'c_prob_epoch','cp', 'obs_cp']
+reward_t1 = np.round(exp_param.t1_r.values,3)
+reward_t2 = np.round(exp_param.t2_r.values,3)
+
+
+rewards = np.transpose(np.array([np.round(reward_t1,2),np.round(reward_t2,2)]))
+rewards = rewards.astype('int')
+max_reward_idx = np.argmax(rewards,1)
+min_reward_idx = np.argmin(rewards,1)
+n_trials = len(exp_param.cp)
+n_test_trials = 40
+
+if testing:
+    n_trials = n_test_trials
+
+total_reward = n_trials
+
+instructions_p1 = ("You're going on a treasure hunt! You will start with " + str(total_reward) + " coins in your treasure chest, and you'll be able to pay a coin to open either a purple or an orange box. When you open one of those boxes, you will get a certain number of coins, depending on the color of the box. However, opening the same box will not always give you the same number of coins, and each choice costs one coin. \n\nAfter making your choice, you will receive feedback about how much money you have. Your goal is to make as much money as possible. \n\nPress the green button when you're ready to continue.")
+instructions_p2 = ("Choose the left box by pressing the left button with your left index finger and choose the right box by pressing the right button with your right index finger. \n\nNote that if you choose too slowly or too quickly, you won't earn any coins. Finally, remember to make your choice based on the color of the box. \n\nPress the green button when you're ready to begin the hunt!")
 slow_trial = ("Too slow! \nChoose quickly.")
 fast_trial = ("Too fast! \nSlow down. \nYou can continue in 5 seconds.")
 break_inst = ("Feel free to take a break! \nPress the green button when you're ready to continue.")
@@ -93,9 +105,8 @@ window = visual.Window(size = screen_size, units='pix', monitor = testing_monito
        colorSpace = 'rgb', blendMode = 'avg', useFBO = True, allowGUI = \
        False,fullscr=True, pos=center)
 
-
 break_msg = visual.TextStim(win=window, units='pix',antialias='False', text=break_inst, wrapWidth=screen_size[0]-400, height=screen_size[1]/25)
-inst_msg = visual.TextStim(win=window, units='pix',antialias='False', text=instructions, wrapWidth=screen_size[0]-400, height=screen_size[1]/25)
+inst_msg = visual.TextStim(win=window, units='pix',antialias='False', wrapWidth=screen_size[0]-400, height=screen_size[1]/25)
 end_msg = visual.TextStim(win=window, units='pix', antialias='False', wrapWidth=screen_size[0]-400, height=screen_size[1]/25)
 speed_msg = visual.TextStim(win=window, units='pix',antialias='False', text=slow_trial,  wrapWidth=screen_size[0]-400, height=screen_size[1]/15,
 alignHoriz='center', colorSpace='rgb',color=[1,-1,-1], bold=True)
@@ -120,22 +131,6 @@ totalMsg = visual.TextStim(win=window,units='pix',antialias='False',pos=[treasur
 
 cue_list = [purple_block, orange_block]
 high_val_cue = []
-
-#specify constants
-exp_param = read_csv(exp_param_file, header=0)
-exp_param.columns = ['t1_r', 't2_r','c_prob','cp', 'obs_cp']
-reward_t1 = np.round(exp_param.t1_r.values,3)
-reward_t2 = np.round(exp_param.t2_r.values,3)
-
-
-rewards = np.transpose(np.array([np.round(reward_t1,2),np.round(reward_t2,2)]))
-rewards = rewards.astype('int')
-max_reward_idx = np.argmax(rewards,1)
-min_reward_idx = np.argmin(rewards,1)
-n_trials = len(exp_param.cp)
-n_test_trials = 40
-if testing:
-    n_trials = n_test_trials
 
 #define target coordinates
 left_pos_x = -screen_size[0]/5
@@ -165,7 +160,7 @@ rt_max = 1
 rt_min = .1
 
 left_key = 'f'
-right_key = 'd'
+right_key = 'a'
 # left_key = "left"
 # right_key = "right"
 escape_key = "escape"
@@ -184,6 +179,11 @@ obs_cp_list = exp_param.obs_cp.values[0:n_trials].tolist()
 #give instructions
 instruction_phase = True
 while instruction_phase:
+    inst_msg.text = instructions_p1
+    inst_msg.setAutoDraw(True)
+    window.flip()
+    inst_keys = event.waitKeys(keyList=['s'])
+    inst_msg.text = instructions_p2
     inst_msg.setAutoDraw(True)
     window.flip()
     inst_keys = event.waitKeys(keyList=['s'])
@@ -193,7 +193,6 @@ inst_msg.setAutoDraw(False)
 window.flip()
 
 # total_reward = 0
-total_reward = n_trials
 t=0
 
 totalMsg.text = str(total_reward)
@@ -254,7 +253,7 @@ while t < n_trials:
         choice_list.append(0)
         choice_emphasis.setPos(left_pos)
         rewardMsg.setPos([left_pos[0]-10, left_pos[1]+200])
-        costMsg.setPos([left_pos[0]-10, left_pos[1]+300])
+        # costMsg.setPos([left_pos[0]-10, left_pos[1]+300])
         coin.setPos([left_pos[0]+110, left_pos[1]+200])
 
 
@@ -262,7 +261,7 @@ while t < n_trials:
         choice_list.append(1)
         choice_emphasis.setPos(right_pos)
         rewardMsg.setPos([right_pos[0]-10, right_pos[1]+200])
-        costMsg.setPos([right_pos[0]-10, right_pos[1]+300])
+        # costMsg.setPos([right_pos[0]-10, right_pos[1]+300])
         coin.setPos([right_pos[0]+110, right_pos[1]+200])
 
     if rt < rt_max and rt > rt_min:
@@ -279,7 +278,7 @@ while t < n_trials:
         total_reward += cost_per_decision
         totalMsg.text = str("{:,}".format(total_reward))
 
-        costMsg.draw()
+        # costMsg.draw()
         choice_emphasis.draw()
         rewardMsg.draw()
         totalMsg.draw()
@@ -364,7 +363,7 @@ begin_time, exp_dir, last_sys_reboot, system_platform, internet_access,\
  total_exp_time, break_time")
 np.savetxt(data_path, data, header=header, delimiter=',',comments='')
 np.savetxt(run_info_path,runtime_data, header=runtime_header,delimiter=',',comments='',fmt="%s")
-end_msg.text = ("Awesome! You earned " + totalMsg.text + " coins. \nLet the experimenter know that you're finished.")
+end_msg.text = ("Awesome! You have " + totalMsg.text + " coins. \nLet the experimenter know that you're finished.")
 
 
 #dismiss participant
