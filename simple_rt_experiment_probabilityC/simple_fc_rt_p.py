@@ -18,7 +18,7 @@ if testing is not 1 and testing is not 0:
     sys.exit('Enter 0 or 1.')
 
 image_directory = os.getcwd() + '/images/'
-exp_param_directory = os.getcwd() + '/experimental_parameters/'
+exp_param_directory = os.getcwd() + '/experimental_parameters/prob_reward_schedules/'
 analysis_directory = os.getcwd() + '/analysis/'
 data_directory = os.getcwd() + '/data/'
 deterministic_exp_param_directory = os.getcwd() + '/experimental_parameters/deterministic_schedules/'
@@ -27,12 +27,12 @@ if testing:
     subj_id = 'test'
     condition = str(0)
     trialfile_n = str(0)
-    exp_param_file = exp_param_directory + 'test_highC.csv'
+    exp_param_file = exp_param_directory + 'hc_0.csv'
     # exp_param_file = deterministic_exp_param_directory + 'test_highV.csv'
 else:
-    subj_id = raw_input("Subject ID: ")
+    subj_id = raw_input("CoAx ID: ")
+    trialfile_n = raw_input("Trial file number: ")
     condition = int(raw_input("Condition: "))
-    trialfile_n = raw_input("Trial file set: ")
 
     if condition == 0:
         exp_param_file = exp_param_directory + 'lc_' + trialfile_n + '.csv'
@@ -56,7 +56,8 @@ if not testing and os.path.exists(data_path):
 
 #specify constants
 exp_param = read_csv(exp_param_file, header=0)
-exp_param.columns = ['t1_r', 't2_r','c_prob', 'c_prob_epoch','cp', 'obs_cp']
+exp_param.columns = ['t1_r', 't2_r','c_prob', 'c_prob_epoch_t0', 'c_prob_epoch_t1','cp', 'obs_cp',
+'mu_rewards', 'std_rewards']
 reward_t1 = np.round(exp_param.t1_r.values,3)
 reward_t2 = np.round(exp_param.t2_r.values,3)
 
