@@ -1,0 +1,2 @@
+psychopy_version, python_version, pythonScipyVersion,pyglet_version, pygame_version, numpy_version, wx_version, window_refresh_time_avg_ms,begin_time, exp_dir, last_sys_reboot, system_platform, internet_access, total_exp_time, break_time
+1.85.2,2.7.12,0.19.1,1.2.4,1.9.3,1.13.1,4.0.0b2 gtk3 (phoenix),100.837069043,2018_04_20 09:04 (Year_Month_Day Hour:Min),/home/coaxlab/Dropbox/volatileValues/simple_rt_experiment_probabilityC,2018-04-20 09:03,linux 4.4.0-119-generic,True,1183.88957095,53.6393239498
