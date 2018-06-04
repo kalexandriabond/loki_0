@@ -1,28 +1,6 @@
-[master d35ad33] add data
- 24 files changed, 7317 insertions(+)
- create mode 100644 simple_rt_experiment_probabilityC/data/0761_cond0_trialset0.csv
- create mode 100644 simple_rt_experiment_probabilityC/data/0761_cond0_trialset0_runInfo.csv
- create mode 100644 simple_rt_experiment_probabilityC/data/0761_cond3_trialset0.csv
- create mode 100644 simple_rt_experiment_probabilityC/data/0761_cond3_trialset0_runInfo.csv
- create mode 100644 simple_rt_experiment_probabilityC/data/0762_cond0_trialset1.csv
- create mode 100644 simple_rt_experiment_probabilityC/data/0762_cond0_trialset1_runInfo.csv
- create mode 100644 simple_rt_experiment_probabilityC/data/0762_cond1_trialset1.csv
- create mode 100644 simple_rt_experiment_probabilityC/data/0762_cond1_trialset1_runInfo.csv
- create mode 100644 simple_rt_experiment_probabilityC/data/0762_cond3_trialset1.csv
- create mode 100644 simple_rt_experiment_probabilityC/data/0762_cond3_trialset1_runInfo.csv
- create mode 100644 simple_rt_experiment_probabilityC/data/0763_cond1_trialset2.csv
- create mode 100644 simple_rt_experiment_probabilityC/data/0763_cond1_trialset2_runInfo.csv
- create mode 100644 simple_rt_experiment_probabilityC/data/0763_cond2_trialset2.csv
- create mode 100644 simple_rt_experiment_probabilityC/data/0763_cond2_trialset2_runInfo.csv
- create mode 100644 simple_rt_experiment_probabilityC/data/0764_cond0_trialset3.csv
- create mode 100644 simple_rt_experiment_probabilityC/data/0764_cond0_trialset3_runInfo.csv
- create mode 100644 simple_rt_experiment_probabilityC/data/0764_cond1_trialset3.csv
- create mode 100644 simple_rt_experiment_probabilityC/data/0764_cond1_trialset3_runInfo.csv
- create mode 100644 simple_rt_experiment_probabilityC/data/0764_cond3_trialset3.csv
- create mode 100644 simple_rt_experiment_probabilityC/data/0764_cond3_trialset3_runInfo.csv
- create mode 100644 simple_rt_experiment_probabilityC/data/0765_cond3_trialset4.csv
- create mode 100644 simple_rt_experiment_probabilityC/data/0765_cond3_trialset4_runInfo.csv
- create mode 100644 simple_rt_experiment_probabilityC/data/763_cond0_trialset2.csv
- create mode 100644 simple_rt_experiment_probabilityC/data/763_cond0_trialset2_runInfo.csv
+[master c21b540] add data
+ 2 files changed, 612 insertions(+)
+ create mode 100644 simple_rt_experiment_probabilityC/data/0782_cond1_trialset21.csv
+ create mode 100644 simple_rt_experiment_probabilityC/data/0782_cond1_trialset21_runInfo.csv
 To github.com:kmbond/volatileValues.git
-   a2583df..d35ad33  master -> master
+   22959aa..c21b540  master -> master
