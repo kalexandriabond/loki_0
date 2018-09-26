@@ -1,3 +1,3 @@
 # loki_0
 
-Experimental parameter generation, cognitive model simulation, raw behavioral data, &amp; analysis.
+Experimental parameter generation, cognitive model simulation, raw behavioral data, &amp; analysis for the first iteration of Loki. 
