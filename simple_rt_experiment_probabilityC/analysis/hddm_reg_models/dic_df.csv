@@ -1,0 +1,8 @@
+model,dic,intercept_diff_dic
+a_B_obs_reg_simple_acc,-15845.124059369387,-83.42122397530329
+a_cpp_obs_reg_simple_acc,-15767.874686502579,-6.171851108494593
+a_cpp_v_B_obs_reg_simple_acc,-18460.653221313034,-2698.95038591895
+intercept_only_obs_reg_simple_acc,-15761.702835394084,0.0
+v_B_obs_reg_simple_acc,-18454.470121050228,-2692.767285656144
+v_cpp_a_B_obs_reg_simple_acc,-16082.347430233942,-320.64459483985775
+v_cpp_obs_reg_simple_acc,-15997.407562735898,-235.70472734181385
